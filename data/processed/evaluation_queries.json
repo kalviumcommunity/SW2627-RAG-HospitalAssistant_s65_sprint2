@@ -1,0 +1,12 @@
+[
+  {"query": "What does the guideline say about drug interaction X?", "expected_document": "Drug Guidelines.pdf", "expected_page": 8},
+  {"query": "How should an emergency response be activated?", "expected_document": "Emergency Protocol.pdf", "expected_page": 1},
+  {"query": "What is the medication reconciliation policy?", "expected_document": "Policy Circular.pdf", "expected_page": 2},
+  {"query": "Which team is notified during an emergency?", "expected_document": "Emergency Protocol.pdf", "expected_page": 1},
+  {"query": "Where is the interaction warning recorded?", "expected_document": "Drug Guidelines.pdf", "expected_page": 8},
+  {"query": "Who approves the updated policy?", "expected_document": "Policy Circular.pdf", "expected_page": 2},
+  {"query": "What monitoring is required after administration?", "expected_document": "Drug Guidelines.pdf", "expected_page": 8},
+  {"query": "What is the first escalation step?", "expected_document": "Emergency Protocol.pdf", "expected_page": 1},
+  {"query": "When does the circular take effect?", "expected_document": "Policy Circular.pdf", "expected_page": 2},
+  {"query": "Which document covers medicine compatibility?", "expected_document": "Drug Guidelines.pdf", "expected_page": 8}
+]
