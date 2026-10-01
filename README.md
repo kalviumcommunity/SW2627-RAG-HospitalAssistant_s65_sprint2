@@ -37,3 +37,9 @@ document identifier, and one-based page number for later retrieval citations.
 Text cleaning trims extraction whitespace, removes null control characters, and
 collapses repeated blank lines without rewriting medical terminology. For
 example, `"  dose  \\n\\n\\n  500 mg "` becomes `"dose\\n\\n500 mg"`.
+
+## Embeddings
+
+`Embedder` uses the model named by `EMBEDDING_MODEL` and reads `OPENAI_API_KEY`
+from `.env`. It accepts batches and converts provider failures into a clear
+`EmbeddingError`; tests inject a fake client and do not make network calls.
