@@ -43,3 +43,10 @@ example, `"  dose  \\n\\n\\n  500 mg "` becomes `"dose\\n\\n500 mg"`.
 `Embedder` uses the model named by `EMBEDDING_MODEL` and reads `OPENAI_API_KEY`
 from `.env`. It accepts batches and converts provider failures into a clear
 `EmbeddingError`; tests inject a fake client and do not make network calls.
+
+## Local vector store
+
+`LocalVectorStore` persists vectors, chunk text, and metadata in
+`data/processed/vector_store.json`. It is created automatically on first write;
+call `clear()` when resetting a local experiment. This JSON store is intended
+for the educational MVP, not production clinical workloads.
