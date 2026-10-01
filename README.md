@@ -33,3 +33,7 @@ tests/     Automated tests
 Place approved, non-sensitive PDF guidelines in `data/raw/`. The loader extracts
 one `DocumentPage` record per page and preserves the filename, source path,
 document identifier, and one-based page number for later retrieval citations.
+
+Text cleaning trims extraction whitespace, removes null control characters, and
+collapses repeated blank lines without rewriting medical terminology. For
+example, `"  dose  \\n\\n\\n  500 mg "` becomes `"dose\\n\\n500 mg"`.
