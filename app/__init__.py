@@ -1,0 +1,1 @@
+"""Hospital Knowledge Assistant application package."""
