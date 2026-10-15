@@ -27,3 +27,9 @@ data/processed/ Intermediate JSON/JSONL data
 scripts/   Command-line pipeline scripts
 tests/     Automated tests
 ```
+
+## Document ingestion
+
+Place approved, non-sensitive PDF guidelines in `data/raw/`. The loader extracts
+one `DocumentPage` record per page and preserves the filename, source path,
+document identifier, and one-based page number for later retrieval citations.
