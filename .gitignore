@@ -7,3 +7,4 @@ __pycache__/
 data/processed/*
 !data/processed/.gitkeep
 !data/processed/example_chunks.jsonl
+!data/processed/evaluation_queries.json
