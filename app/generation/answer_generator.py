@@ -7,6 +7,7 @@ from typing import Any
 from openai import OpenAI
 
 from app.config import LLM_API_KEY, LLM_MODEL, LLM_PROVIDER
+from app.generation.prompt_builder import INSUFFICIENT_CONTEXT, build_grounded_prompt
 
 
 class AnswerGenerationError(RuntimeError):
@@ -33,16 +34,10 @@ class AnswerGenerator:
         if not question.strip():
             raise ValueError("question must not be empty")
         if not retrieved_chunks:
-            return "The supplied documents do not contain enough information to answer this question."
-
-        context = "\n\n".join(str(chunk.get("text", "")).strip() for chunk in retrieved_chunks)
-        if not context.strip():
-            return "The supplied documents do not contain enough information to answer this question."
-        prompt = (
-            "Answer only from the supplied document context. Do not invent facts or provide "
-            "patient-specific medical advice. If the context is insufficient, say so clearly.\n\n"
-            f"DOCUMENT CONTEXT:\n{context}\n\nQUESTION:\n{question}"
-        )
+            return INSUFFICIENT_CONTEXT
+        prompt = build_grounded_prompt(question, retrieved_chunks)
+        if prompt == INSUFFICIENT_CONTEXT:
+            return prompt
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
