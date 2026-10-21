@@ -1,0 +1,23 @@
+:root { font-family: Georgia, serif; color: #24313a; background: #edf1ec; }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; background: linear-gradient(135deg, #edf1ec, #dce8e7); }
+.shell { width: min(900px, 92vw); margin: 0 auto; padding: 8vh 0; }
+header { border-left: 6px solid #c4653f; padding-left: 1.25rem; }
+.eyebrow { color: #c4653f; font: 700 .78rem Arial, sans-serif; letter-spacing: .12em; }
+h1 { margin: .3rem 0; font-size: clamp(2rem, 6vw, 4.2rem); line-height: 1; }
+.warning { max-width: 620px; font-size: 1.1rem; }
+.conversation { min-height: 230px; margin: 2rem 0 1rem; padding: 1.2rem; border: 1px solid #b8c9c7; background: rgba(255,255,255,.58); }
+.conversation-heading { display: flex; align-items: center; justify-content: space-between; }
+.conversation-heading h2 { margin: 0; font-size: 1.15rem; }
+.conversation-heading button { background: transparent; color: #24313a; border: 1px solid #24313a; padding: .45rem .7rem; }
+.empty { color: #617177; }
+.composer { display: grid; gap: .65rem; padding: 1.2rem; background: #24313a; color: #f4f1e8; }
+label { font: 700 .8rem Arial, sans-serif; text-transform: uppercase; letter-spacing: .08em; }
+textarea { width: 100%; resize: vertical; border: 0; padding: .9rem; font: 1rem Georgia, serif; }
+.actions { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+button { border: 0; padding: .75rem 1.1rem; background: #d97951; color: white; font-weight: 700; cursor: pointer; }
+button:disabled { opacity: .55; cursor: wait; }
+.message { margin: 0 0 1rem; padding: .9rem; background: white; border-left: 4px solid #6d9892; }
+.message strong { display: block; margin-bottom: .35rem; font: 700 .8rem Arial, sans-serif; text-transform: uppercase; }
+.sources { margin: .65rem 0 0; padding-left: 1.1rem; color: #53636a; font-size: .9rem; }
+@media (max-width: 600px) { .shell { padding: 5vh 0; } .actions { align-items: stretch; flex-direction: column; } }
