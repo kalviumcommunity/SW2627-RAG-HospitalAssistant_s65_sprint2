@@ -3,6 +3,8 @@ const question = document.querySelector("#question");
 const conversation = document.querySelector("#conversation");
 const status = document.querySelector("#status");
 const button = document.querySelector("#ask-button");
+const clearButton = document.querySelector("#clear-button");
+const conversationHistory = [];
 
 function addMessage(label, text, sources = []) {
   conversation.querySelector(".empty")?.remove();
@@ -25,7 +27,17 @@ function addMessage(label, text, sources = []) {
     message.append(list);
   }
   conversation.append(message);
+  conversationHistory.push({ role: label.toLowerCase(), text, sources });
 }
+
+clearButton.addEventListener("click", () => {
+  conversationHistory.length = 0;
+  conversation.replaceChildren(Object.assign(document.createElement("p"), {
+    className: "empty",
+    textContent: "Ask a question about the indexed hospital guidelines.",
+  }));
+  status.textContent = "Conversation cleared.";
+});
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();

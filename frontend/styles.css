@@ -7,6 +7,9 @@ header { border-left: 6px solid #c4653f; padding-left: 1.25rem; }
 h1 { margin: .3rem 0; font-size: clamp(2rem, 6vw, 4.2rem); line-height: 1; }
 .warning { max-width: 620px; font-size: 1.1rem; }
 .conversation { min-height: 230px; margin: 2rem 0 1rem; padding: 1.2rem; border: 1px solid #b8c9c7; background: rgba(255,255,255,.58); }
+.conversation-heading { display: flex; align-items: center; justify-content: space-between; }
+.conversation-heading h2 { margin: 0; font-size: 1.15rem; }
+.conversation-heading button { background: transparent; color: #24313a; border: 1px solid #24313a; padding: .45rem .7rem; }
 .empty { color: #617177; }
 .composer { display: grid; gap: .65rem; padding: 1.2rem; background: #24313a; color: #f4f1e8; }
 label { font: 700 .8rem Arial, sans-serif; text-transform: uppercase; letter-spacing: .08em; }
