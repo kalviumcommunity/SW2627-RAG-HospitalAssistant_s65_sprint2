@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hospital Knowledge Assistant</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <p class="eyebrow">EDUCATIONAL KNOWLEDGE TOOL</p>
+      <h1>Hospital Knowledge Assistant</h1>
+      <p class="warning">Use approved documents as a learning aid. This tool is not a substitute for clinical judgment.</p>
+    </header>
+    <div class="conversation-heading"><h2>Conversation</h2><button id="clear-button" type="button">Clear</button></div>
+    <section id="conversation" class="conversation" aria-live="polite">
+      <p class="empty">Ask a question about the indexed hospital guidelines.</p>
+    </section>
+    <form id="ask-form" class="composer">
+      <label for="question">Question</label>
+      <textarea id="question" rows="3" required placeholder="Ask about an approved guideline..."></textarea>
+      <div class="actions"><span id="status" role="status"></span><button id="ask-button" type="submit">Ask assistant</button></div>
+    </form>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
