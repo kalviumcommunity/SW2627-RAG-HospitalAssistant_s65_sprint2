@@ -1,19 +1,18 @@
 # Hospital Knowledge Assistant
 
-Educational retrieval pipeline for approved, non-sensitive hospital documents.
+Educational, source-grounded knowledge assistant for approved, non-sensitive hospital documents.
 
-This first phase covers document ingestion, cleaning, chunking, metadata,
-embeddings, local vector storage, retrieval, and retrieval evaluation. It does
-not generate clinical answers or provide patient-specific medical advice.
+The project now demonstrates ingestion through retrieval, grounded answer
+generation, citations, a small backend API, and a browser chat interface.
 
 ## Setup
 
 ```bash
-python3 -m venv .venv
+python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
-pytest
+python -m pytest
 ```
 
 Keep API keys in `.env`; never commit that file or real patient data.
@@ -22,6 +21,7 @@ Keep API keys in `.env`; never commit that file or real patient data.
 
 ```text
 app/       Pipeline code grouped by stage
+frontend/  Static chat interface
 data/raw/  Approved sample input documents
 data/processed/ Intermediate JSON/JSONL data
 scripts/   Command-line pipeline scripts
@@ -65,11 +65,47 @@ results = retrieve_context("What is the drug interaction guidance?", top_k=5)
 Evaluation runs with `python scripts/evaluate_retrieval.py` and uses the labelled
 cases in `data/processed/evaluation_queries.json`.
 
+## Run the assistant
+
+Set `OPENAI_API_KEY` (or the separate `EMBEDDING_API_KEY` and `LLM_API_KEY`)
+in an uncommitted `.env` file. Choose models with `EMBEDDING_MODEL` and
+`LLM_MODEL`. Index approved documents with:
+
+```bash
+python scripts/index_documents.py
+```
+
+Start the backend with `python scripts/run_api.py`, then serve `frontend/`
+from another terminal with `python -m http.server 8080 --directory frontend`.
+Open `http://127.0.0.1:8080`. The API can also be called directly:
+
+```bash
+curl -X POST http://127.0.0.1:8000/ask \
+	-H "Content-Type: application/json" \
+	-d '{"question":"What does the approved guideline say?","top_k":5}'
+```
+
 ```text
 Documents -> Loader -> Cleaner -> Chunker -> Metadata -> Embeddings
 		  -> Vector Store -> Retriever -> Retrieval Service
 ```
 
-LLM answer generation, grounded prompting, citations in generated answers,
-backend API, chat UI, and deployment are intentionally not implemented in this
-phase. This is an educational MVP and does not claim clinical accuracy.
+```text
+Documents -> Loader -> Cleaner -> Chunker -> Metadata -> Embeddings
+		  -> Vector Store -> Retriever -> Grounded Prompt -> LLM Answer
+		  -> Citations -> Backend API -> Chat UI
+```
+
+## Safety and limitations
+
+This project is an educational MVP. It does not provide medical diagnosis,
+patient-specific medical advice, automatic treatment decisions, or clinical guarantees.
+Answers are limited to retrieved context and citations identify source metadata;
+citations do not prove clinical correctness. Conversation history is in-memory
+only and is not suitable for production clinical records. Use only approved,
+non-sensitive documents and never commit `.env`, API keys, patient data, or
+confidential hospital documents.
+
+Production deployment, complex authentication, audit logging, security testing,
+clinical validation, compliance review, advanced monitoring, and performance
+hardening are intentionally deferred.
