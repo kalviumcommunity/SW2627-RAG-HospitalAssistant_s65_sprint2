@@ -16,6 +16,8 @@ python -m pytest
 ```
 
 Keep API keys in `.env`; never commit that file or real patient data.
+PDF files under `data/raw/` are intentionally ignored by Git. Keep downloaded
+WHO or hospital documents local unless their redistribution is explicitly approved.
 
 ## Current layout
 
@@ -109,3 +111,6 @@ confidential hospital documents.
 Production deployment, complex authentication, audit logging, security testing,
 clinical validation, compliance review, advanced monitoring, and performance
 hardening are intentionally deferred.
+
+The API currently adds request identifiers and basic browser security headers,
+and returns generic internal errors without exposing implementation details.

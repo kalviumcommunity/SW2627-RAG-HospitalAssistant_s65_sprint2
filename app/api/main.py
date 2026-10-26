@@ -7,7 +7,8 @@ import time
 from uuid import uuid4
 from typing import Any, Callable
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from app.generation.answer_generator import AnswerGenerationError, AnswerGenerator
@@ -29,11 +30,22 @@ def create_app(
     app = FastAPI(title="Hospital Knowledge Assistant")
 
     @app.middleware("http")
-    async def request_context(request: Any, call_next: Any) -> Any:
-        request_id = request.headers.get("X-Request-ID") or uuid4().hex
+    async def request_context(request: Request, call_next: Any) -> Any:
+        supplied_request_id = request.headers.get("X-Request-ID", "").strip()
+        request_id = supplied_request_id if 0 < len(supplied_request_id) <= 128 else uuid4().hex
         started = time.perf_counter()
-        response = await call_next(request)
+        try:
+            response = await call_next(request)
+        except Exception:
+            logger.exception("unhandled request failure id=%s path=%s", request_id, request.url.path)
+            response = JSONResponse(
+                status_code=500,
+                content={"detail": "internal server error"},
+            )
         response.headers["X-Request-ID"] = request_id
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "no-referrer"
         logger.info("request completed id=%s path=%s status=%s duration_ms=%.1f", request_id, request.url.path, response.status_code, (time.perf_counter() - started) * 1000)
         return response
 
