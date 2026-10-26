@@ -25,7 +25,7 @@ services:
     name: hospital-assistant-frontend
     runtime: static
     rootDir: frontend
-    buildCommand: printf 'window.APP_CONFIG = { apiBase: "%s" };' "$BACKEND_URL" > config.js
+    buildCommand: sh build.sh
     staticPublishPath: .
     envVars:
       - key: BACKEND_URL
