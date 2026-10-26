@@ -13,6 +13,20 @@
       <h1>Hospital Knowledge Assistant</h1>
       <p class="warning">Use approved documents as a learning aid. This tool is not a substitute for clinical judgment.</p>
     </header>
+    <section class="documents-panel" aria-labelledby="documents-title">
+      <div class="conversation-heading">
+        <h2 id="documents-title">Approved documents</h2>
+        <button id="refresh-documents" type="button">Refresh</button>
+      </div>
+      <p class="upload-note">Upload approved, non-sensitive PDF documents. A file with the same name replaces its indexed version.</p>
+      <form id="upload-form" class="upload-form">
+        <label for="document-file">PDF document</label>
+        <input id="document-file" type="file" accept=".pdf,application/pdf" required>
+        <button id="upload-button" type="submit">Upload and index</button>
+      </form>
+      <p id="upload-status" role="status"></p>
+      <ul id="document-list" class="document-list"><li>Loading documents...</li></ul>
+    </section>
     <div class="conversation-heading"><h2>Conversation</h2><button id="clear-button" type="button">Clear</button></div>
     <section id="conversation" class="conversation" aria-live="polite">
       <p class="empty">Ask a question about the indexed hospital guidelines.</p>
@@ -23,6 +37,7 @@
       <div class="actions"><span id="status" role="status"></span><button id="ask-button" type="submit">Ask assistant</button></div>
     </form>
   </main>
+  <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -9,16 +9,20 @@ class FakeEmbeddings:
     def __init__(self) -> None:
         self.calls: list[list[str]] = []
 
-    def create(self, *, model: str, input: list[str]) -> SimpleNamespace:
-        self.calls.append(input)
-        return SimpleNamespace(
-            data=[SimpleNamespace(embedding=[float(len(text)), 1.0]) for text in input]
-        )
+    def encode(
+        self,
+        texts: list[str],
+        *,
+        convert_to_numpy: bool,
+        normalize_embeddings: bool,
+    ) -> list[list[float]]:
+        self.calls.append(texts)
+        return [[float(len(text)), 1.0] for text in texts]
 
 
 def test_embedder_batches_texts_and_preserves_order() -> None:
     embeddings = FakeEmbeddings()
-    embedder = Embedder(client=SimpleNamespace(embeddings=embeddings), batch_size=2)
+    embedder = Embedder(client=embeddings, batch_size=2)
 
     result = embedder.embed_texts(["one", "two", "three"])
 
@@ -27,16 +31,16 @@ def test_embedder_batches_texts_and_preserves_order() -> None:
 
 
 def test_embedder_rejects_empty_text() -> None:
-    embedder = Embedder(client=SimpleNamespace(embeddings=FakeEmbeddings()))
+    embedder = Embedder(client=FakeEmbeddings())
     with pytest.raises(ValueError):
         embedder.embed_text("")
 
 
 def test_embedder_wraps_provider_errors() -> None:
     class BrokenEmbeddings:
-        def create(self, **_: object) -> None:
+        def encode(self, **_: object) -> None:
             raise RuntimeError("network failure")
 
-    embedder = Embedder(client=SimpleNamespace(embeddings=BrokenEmbeddings()))
+    embedder = Embedder(client=BrokenEmbeddings())
     with pytest.raises(EmbeddingError):
         embedder.embed_text("protocol")

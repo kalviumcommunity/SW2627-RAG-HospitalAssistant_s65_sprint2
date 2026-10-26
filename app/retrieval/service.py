@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -14,6 +15,12 @@ from app.vector_store.local_store import LocalVectorStore
 
 class RetrievalServiceError(RuntimeError):
     """Raised when retrieval cannot be completed."""
+
+
+@lru_cache(maxsize=1)
+def _local_embedder() -> Embedder:
+    """Load the local model once per API process instead of once per request."""
+    return Embedder()
 
 
 def retrieve_context(
@@ -30,7 +37,7 @@ def retrieve_context(
 
     active_retriever = retriever
     if active_retriever is None:
-        active_retriever = Retriever(Embedder(), LocalVectorStore(store_path))
+        active_retriever = Retriever(_local_embedder(), LocalVectorStore(store_path))
     try:
         return active_retriever.retrieve(question, top_k=top_k)
     except (EmbeddingError, OSError, KeyError, TypeError, ValueError, json.JSONDecodeError) as error:

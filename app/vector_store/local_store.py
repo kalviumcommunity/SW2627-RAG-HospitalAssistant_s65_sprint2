@@ -58,6 +58,73 @@ class LocalVectorStore:
         self._records = []
         self._save()
 
+    def replace_document(self, document_name: str, records: list[dict[str, Any]]) -> None:
+        """Atomically replace all records belonging to one document."""
+        for record in records:
+            if not {"vector", "text", "metadata"}.issubset(record):
+                raise ValueError("each record needs vector, text, and metadata")
+        retained = [
+            record
+            for record in self._records
+            if record.get("metadata", {}).get("document_name") != document_name
+        ]
+        self._records = retained + records
+        self._save_atomic()
+
+    def replace_all(self, records: list[dict[str, Any]]) -> None:
+        """Atomically replace the complete vector store."""
+        for record in records:
+            if not {"vector", "text", "metadata"}.issubset(record):
+                raise ValueError("each record needs vector, text, and metadata")
+        self._records = list(records)
+        self._save_atomic()
+
+    def remove_document(self, document_name: str) -> int:
+        """Remove one document and return the number of removed chunks."""
+        retained = [
+            record
+            for record in self._records
+            if record.get("metadata", {}).get("document_name") != document_name
+        ]
+        removed = len(self._records) - len(retained)
+        self._records = retained
+        if removed:
+            self._save_atomic()
+        return removed
+
+    def list_documents(self) -> list[dict[str, Any]]:
+        documents: dict[str, dict[str, Any]] = {}
+        for record in self._records:
+            metadata = record.get("metadata", {})
+            name = metadata.get("document_name")
+            if not name:
+                continue
+            item = documents.setdefault(
+                name,
+                {
+                    "name": name,
+                    "document_id": metadata.get("document_id"),
+                    "source_path": metadata.get("source_path"),
+                    "file_hash": metadata.get("file_hash"),
+                    "pages": set(),
+                    "chunks": 0,
+                },
+            )
+            if metadata.get("page_number") is not None:
+                item["pages"].add(metadata["page_number"])
+            item["chunks"] += 1
+        return [
+            {**item, "pages": len(item["pages"])}
+            for item in sorted(documents.values(), key=lambda value: value["name"])
+        ]
+
+    def _save_atomic(self) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = self.path.with_suffix(self.path.suffix + ".tmp")
+        with temporary.open("w", encoding="utf-8") as handle:
+            json.dump({"records": self._records}, handle, indent=2)
+        temporary.replace(self.path)
+
     def search(
         self, query_vector: list[float], top_k: int = 5, threshold: float | None = None
     ) -> list[dict[str, Any]]:
