@@ -15,6 +15,13 @@ def _path_from_env(name: str, default: str) -> Path:
     return path if path.is_absolute() else PROJECT_ROOT / path
 
 
+def _origin_from_env(value: str) -> str:
+    origin = value.strip().rstrip("/")
+    if origin and not origin.startswith(("http://", "https://")):
+        return f"https://{origin}"
+    return origin
+
+
 RAW_DATA_DIR = _path_from_env("RAW_DATA_DIR", "data/raw")
 PROCESSED_DATA_DIR = _path_from_env("PROCESSED_DATA_DIR", "data/processed")
 VECTOR_STORE_PATH = _path_from_env("VECTOR_STORE_PATH", "data/processed/vector_store.json")
@@ -33,7 +40,7 @@ LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini")
 LLM_MODEL = os.getenv("LLM_MODEL", "gemini-3.5-flash-lite")
 LLM_API_KEY = os.getenv("LLM_API_KEY") or GEMINI_API_KEY
 CORS_ORIGINS = [
-    origin.strip()
+    _origin_from_env(origin)
     for origin in os.getenv(
         "CORS_ORIGINS", "http://localhost:8080,http://127.0.0.1:8080"
     ).split(",")
