@@ -3,15 +3,44 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+import hashlib
+import math
 from typing import Any
-
-from sentence_transformers import SentenceTransformer
 
 from app.config import EMBEDDING_MODEL
 
 
 class EmbeddingError(RuntimeError):
     """Raised when the embedding provider cannot create vectors."""
+
+
+class _HashingClient:
+    def __init__(self, dimensions: int) -> None:
+        if dimensions <= 0:
+            raise ValueError("hashing dimensions must be positive")
+        self.dimensions = dimensions
+
+    def encode(
+        self,
+        texts: Sequence[str],
+        *,
+        convert_to_numpy: bool,
+        normalize_embeddings: bool,
+    ) -> list[list[float]]:
+        vectors = []
+        for text in texts:
+            vector = [0.0] * self.dimensions
+            for token in text.lower().split():
+                digest = hashlib.blake2b(token.encode("utf-8"), digest_size=8).digest()
+                index = int.from_bytes(digest[:4], "big") % self.dimensions
+                sign = 1.0 if digest[4] & 1 else -1.0
+                vector[index] += sign
+            if normalize_embeddings:
+                norm = math.sqrt(sum(value * value for value in vector))
+                if norm:
+                    vector = [value / norm for value in vector]
+            vectors.append(vector)
+        return vectors
 
 
 class Embedder:
@@ -25,7 +54,18 @@ class Embedder:
             raise ValueError("batch_size must be positive")
         self.model = model
         self.batch_size = batch_size
-        self.client = client or SentenceTransformer(model)
+        if client:
+            self.client = client
+        elif model.startswith("hash-"):
+            try:
+                dimensions = int(model.removeprefix("hash-"))
+            except ValueError as error:
+                raise ValueError("hash embedding model must use the format hash-N") from error
+            self.client = _HashingClient(dimensions)
+        else:
+            from sentence_transformers import SentenceTransformer
+
+            self.client = SentenceTransformer(model)
 
     def embed_text(self, text: str) -> list[float]:
         vectors = self.embed_texts([text])

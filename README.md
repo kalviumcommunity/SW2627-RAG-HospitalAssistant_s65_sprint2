@@ -48,6 +48,12 @@ does not use Gemini quota or an API key. It accepts batches and converts model
 failures into a clear `EmbeddingError`; tests inject a fake client and do not
 download a model.
 
+For the free Render service, `render.yaml` selects `EMBEDDING_MODEL=hash-384`.
+This dependency-free hashed embedding avoids loading PyTorch on the 512 MB
+free instance. It is suitable for the educational demo but generally gives
+less semantic retrieval than MiniLM. Set `EMBEDDING_MODEL=all-MiniLM-L6-v2`
+when running locally or on a larger instance.
+
 ## Local vector store
 
 `LocalVectorStore` persists vectors, chunk text, and metadata in
