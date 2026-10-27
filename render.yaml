@@ -1,6 +1,7 @@
 services:
   - type: web
     name: hospital-assistant-api
+    plan: free
     runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: python scripts/run_api.py
@@ -9,7 +10,10 @@ services:
       - key: GEMINI_API_KEY
         sync: false
       - key: CORS_ORIGINS
-        sync: false
+        fromService:
+          type: static
+          name: hospital-assistant-frontend
+          property: host
       - key: PYTHON_VERSION
         value: 3.11.9
       - key: MAX_DOCUMENTS
@@ -29,4 +33,7 @@ services:
     staticPublishPath: .
     envVars:
       - key: BACKEND_URL
-        sync: false
+        fromService:
+          type: web
+          name: hospital-assistant-api
+          property: host
