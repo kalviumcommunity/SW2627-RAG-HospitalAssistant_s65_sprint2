@@ -11,7 +11,7 @@ const uploadStatus = document.querySelector("#upload-status");
 const documentList = document.querySelector("#document-list");
 const refreshDocuments = document.querySelector("#refresh-documents");
 const conversationHistory = [];
-const apiBase = window.APP_CONFIG?.apiBase || "http://localhost:8000";
+const apiBase = (window.APP_CONFIG?.apiBase || "http://localhost:8000").replace(/\/+$/, "");
 
 async function loadDocuments() {
   try {
