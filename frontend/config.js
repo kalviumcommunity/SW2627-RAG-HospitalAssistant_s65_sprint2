@@ -1,3 +1,3 @@
 window.APP_CONFIG = {
-  apiBase: "http://localhost:8000",
+  apiBase: "https://new-comparing-reuters-sites.trycloudflare.com",
 };
