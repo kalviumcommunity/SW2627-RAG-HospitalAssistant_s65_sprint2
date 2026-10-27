@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+from functools import lru_cache
 from typing import Any
 
-from openai import OpenAI
+from google import genai
+from google.genai import types
 
-from app.config import LLM_API_KEY, LLM_MODEL, LLM_PROVIDER
+from app.config import LLM_API_KEY, LLM_MAX_OUTPUT_TOKENS, LLM_MODEL, LLM_PROVIDER, LLM_TIMEOUT_MS
 from app.generation.prompt_builder import INSUFFICIENT_CONTEXT, build_grounded_prompt
 
 
@@ -24,10 +26,15 @@ class AnswerGenerator:
         api_key: str | None = LLM_API_KEY,
         client: Any | None = None,
     ) -> None:
-        if provider != "openai":
+        if provider != "gemini":
             raise ValueError(f"unsupported LLM provider: {provider}")
+        if client is None and not api_key:
+            raise ValueError("GEMINI_API_KEY must be configured")
         self.model = model
-        self.client = client or OpenAI(api_key=api_key)
+        self.client = client or genai.Client(
+            api_key=api_key,
+            http_options=types.HttpOptions(timeout=LLM_TIMEOUT_MS),
+        )
 
     def generate(self, question: str, retrieved_chunks: list[dict[str, Any]]) -> str:
         """Generate an answer only when the caller supplied relevant context."""
@@ -39,16 +46,23 @@ class AnswerGenerator:
         if prompt == INSUFFICIENT_CONTEXT:
             return prompt
         try:
-            response = self.client.chat.completions.create(
+            response = self.client.models.generate_content(
                 model=self.model,
-                messages=[
-                    {"role": "system", "content": "You are a cautious educational hospital knowledge assistant."},
-                    {"role": "user", "content": prompt},
-                ],
+                contents=(
+                    "You are a cautious educational hospital knowledge assistant. "
+                    "Answer only from the supplied context.\n\n" + prompt
+                ),
+                config={"max_output_tokens": LLM_MAX_OUTPUT_TOKENS},
             )
-            answer = response.choices[0].message.content
+            answer = response.text if response is not None else None
         except Exception as error:
             raise AnswerGenerationError("language model request failed") from error
         if not answer or not answer.strip():
             raise AnswerGenerationError("language model returned an empty answer")
         return answer.strip()
+
+
+@lru_cache(maxsize=1)
+def get_answer_generator() -> AnswerGenerator:
+    """Reuse the Gemini client across requests."""
+    return AnswerGenerator()

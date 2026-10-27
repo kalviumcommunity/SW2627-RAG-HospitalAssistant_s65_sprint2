@@ -5,9 +5,9 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Any
 
-from openai import OpenAI
+from sentence_transformers import SentenceTransformer
 
-from app.config import EMBEDDING_API_KEY, EMBEDDING_MODEL
+from app.config import EMBEDDING_MODEL
 
 
 class EmbeddingError(RuntimeError):
@@ -18,7 +18,6 @@ class Embedder:
     def __init__(
         self,
         model: str = EMBEDDING_MODEL,
-        api_key: str | None = EMBEDDING_API_KEY,
         client: Any | None = None,
         batch_size: int = 100,
     ) -> None:
@@ -26,7 +25,7 @@ class Embedder:
             raise ValueError("batch_size must be positive")
         self.model = model
         self.batch_size = batch_size
-        self.client = client or OpenAI(api_key=api_key)
+        self.client = client or SentenceTransformer(model)
 
     def embed_text(self, text: str) -> list[float]:
         vectors = self.embed_texts([text])
@@ -42,8 +41,12 @@ class Embedder:
         try:
             for start in range(0, len(texts), self.batch_size):
                 batch = list(texts[start : start + self.batch_size])
-                response = self.client.embeddings.create(model=self.model, input=batch)
-                vectors.extend([list(item.embedding) for item in response.data])
+                response = self.client.encode(
+                    batch,
+                    convert_to_numpy=False,
+                    normalize_embeddings=True,
+                )
+                vectors.extend([[float(value) for value in vector] for vector in response])
         except Exception as error:
             raise EmbeddingError("embedding provider request failed") from error
         if len(vectors) != len(texts):

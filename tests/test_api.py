@@ -31,3 +31,22 @@ def test_ask_maps_retrieval_failure_to_service_error() -> None:
     response = TestClient(create_app(retrieve=broken)).post("/ask", json={"question": "Question"})
     assert response.status_code == 503
     assert response.json() == {"detail": "retrieval is temporarily unavailable"}
+
+
+def test_documents_upload_list_and_delete(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "app.api.main.index_uploaded_document",
+        lambda content, filename: {"status": "indexed", "document": filename, "pages": 1, "chunks": 1, "replaced": False},
+    )
+    monkeypatch.setattr("app.api.main.list_indexed_documents", lambda: [{"name": "guide.pdf", "pages": 1, "chunks": 1}])
+    monkeypatch.setattr(
+        "app.api.main.remove_document",
+        lambda name: {"status": "removed", "document": name, "chunks": 1},
+    )
+    client = TestClient(create_app(retrieve=lambda q, k: [], generate=lambda q, c: "unused"))
+
+    upload = client.post("/documents/upload", files={"file": ("guide.pdf", b"%PDF", "application/pdf")})
+    assert upload.status_code == 200
+    assert upload.json()["document"] == "guide.pdf"
+    assert client.get("/documents").json()["documents"][0]["name"] == "guide.pdf"
+    assert client.delete("/documents/guide.pdf").json()["status"] == "removed"
