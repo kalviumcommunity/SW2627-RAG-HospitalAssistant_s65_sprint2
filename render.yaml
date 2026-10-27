@@ -16,6 +16,8 @@ services:
           property: host
       - key: PYTHON_VERSION
         value: 3.11.9
+      - key: HOST
+        value: 0.0.0.0
       - key: MAX_DOCUMENTS
         value: "100"
       - key: MAX_PAGES
